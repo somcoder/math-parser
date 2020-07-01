@@ -1,0 +1,78 @@
+use std::str::FromStr;
+use lalrpop_util::ParseError;
+
+use super::*;
+use self::core::{Value, Unit, Converter};
+
+grammar<'a>(converter: &'a Converter<'a>);
+
+pub Number = { Num, "(" <Number> ")", "-" <Num> => <> * -1. };
+
+Num: f64 = r"[0-9]+(?:\.[0-9]+)?" =>? f64::from_str(<>)
+    .map_err(|_| ParseError::User { error: "cannot parse that value!" });
+
+Ident: String = r"[a-zA-Z$_]+" => <>.to_string();
+
+pub Expression: Value = {
+    <l: ValueTerm> Add <mut r:Factor> => converter.add(l, &mut r),
+    <l: Expression> Sub <mut r: Factor> => converter.sub(l, &mut r),
+    <l: Expression> Power <r: Term> => l.power(r),
+    Factor
+};
+
+Term: f64 = {
+    Num,
+    "(" <Expression> ")" => <>.number,
+    "-" <Term> => <> * -1.0, // Multiply by -1.0 to negate the number.
+};
+
+ValueTerm: Value = {
+    <Term> => Value::unitless(<>),
+    <n: Num> <i: Ident> => Value::simple(n, i),
+    <n: Num> "%" => Value::simple(n, String::from("%"))
+};
+
+Factor: Value = {
+    <l: Factor> Mult <mut r: ValueTerm> => converter.mul(l, &mut r),
+    <l: Factor> Div <mut r: ValueTerm> => converter.div(l, &mut r),
+    <l: Factor> Mod <mut r: ValueTerm> => converter.rem(l, &mut r),
+    ValueTerm
+};
+
+Power: &'input str = {
+    "power",
+    "to the power of",
+    "**",
+    "^"
+};
+
+Add: &'static str = {
+    "plus" => "+",
+    "add" => "+",
+    "+" => "+"
+};
+
+Sub: &'input str = {
+    "subtract",
+    "minus",
+    "-"
+};
+
+Mult: &'input str = {
+    "*",
+    "times",
+    "multiplied by",
+    "multiply"
+};
+
+Div: &'input str = {
+    "divide by",
+    "divided by",
+    "/"
+};
+
+Mod: &'input str = {
+    "mod",
+    "modulo",
+    "modulas"
+}
