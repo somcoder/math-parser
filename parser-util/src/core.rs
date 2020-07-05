@@ -3,25 +3,13 @@ use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 
 use std::{collections::HashMap, hash::Hash};
 
-// // #[macro_export]
-// // macro_rules! conversions {
-// //     ($($from:literal to $to:literal is $ratio:literal)) => {
-// //         {
-// //             let mut map: HashMap<(Unit, Unit), f64> = HashMap::new();
-// //             $(map.insert((Unit($from), Unit($to)), $ratio as f64))*
-
-// //             map
-// //         }
-// //     };
-// // }
-
 pub struct Converter<'a> {
     pub conversions: HashMap<(Unit, Unit), f64>,
     pub variables: HashMap<&'a str, Value>,
 }
 
 impl<'a> Converter<'a> {
-    /// Initialize the converter.
+    /// Initializes the converter.
     pub fn new(conversions: HashMap<(Unit, Unit), f64>) -> Self {
         let mut conversions = conversions;
         
@@ -34,7 +22,7 @@ impl<'a> Converter<'a> {
         }
     }
 
-    /// Addition
+    /// Addition.
     pub fn add(&self, left: Value, right: &mut Value) -> Value {
         if left.unit != right.unit {
             let converted = self.convert(right, &left.unit.clone().unwrap_or_default());
