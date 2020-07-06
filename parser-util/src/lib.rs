@@ -59,15 +59,15 @@ mod tests {
     fn conversion_works() {
         let converter = setup();
         let two_hours = Value::new(1200., Unit::new("second"));
-        let minutes = converter.convert(&two_hours, &Unit::new("minute"));
-        println!("{} to minutes: {}", two_hours, minutes);
+        let minutes = converter.convert(two_hours, &Unit::new("minute"));
+        println!("Minutes: {}", minutes);
         
         let cents = Value::new(200., Unit::new("cm"));
-        let meters = converter.convert(&cents, &Unit::new("m"));
-        println!("{} = {}", cents, meters);
+        let meters = converter.convert(cents, &Unit::new("m"));
+        println!("200cm = {}", meters);
         
-        let mm = converter.convert(&meters, &Unit::new("mm"));
-        println!("{} = {}", meters, mm);
+        let mm = converter.convert(meters, &Unit::new("mm"));
+        println!("2m = {}", mm);
     }
 
     fn setup<'a>() -> Converter<'a> {

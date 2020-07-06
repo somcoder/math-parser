@@ -2,7 +2,7 @@ use std::str::FromStr;
 use lalrpop_util::ParseError;
 
 use super::*;
-use self::core::{Value, Unit, Converter};
+use self::core::{Value, Converter};
 
 grammar<'a>(converter: &'a Converter<'a>);
 
@@ -14,8 +14,8 @@ Num: f64 = r"[0-9]+(?:\.[0-9]+)?" =>? f64::from_str(<>)
 Ident: String = r"[a-zA-Z$_]+" => <>.to_string();
 
 pub Expression: Value = {
-    <l: ValueTerm> Add <mut r:Factor> => converter.add(l, &mut r),
-    <l: Expression> Sub <mut r: Factor> => converter.sub(l, &mut r),
+    <l: ValueTerm> Add <r:Factor> => converter.add(l, r),
+    <l: Expression> Sub <r: Factor> => converter.sub(l, r),
     <l: Expression> Power <r: Term> => l.power(r),
     Factor
 };
@@ -33,9 +33,9 @@ ValueTerm: Value = {
 };
 
 Factor: Value = {
-    <l: Factor> Mult <mut r: ValueTerm> => converter.mul(l, &mut r),
-    <l: Factor> Div <mut r: ValueTerm> => converter.div(l, &mut r),
-    <l: Factor> Mod <mut r: ValueTerm> => converter.rem(l, &mut r),
+    <l: Factor> Mult <r: ValueTerm> => converter.mul(l, r),
+    <l: Factor> Div <r: ValueTerm> => converter.div(l, r),
+    <l: Factor> Mod <r: ValueTerm> => converter.rem(l, r),
     ValueTerm
 };
 

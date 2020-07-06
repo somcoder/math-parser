@@ -23,63 +23,53 @@ impl<'a> Converter<'a> {
     }
 
     /// Addition.
-    pub fn add(&self, left: Value, right: &mut Value) -> Value {
+    pub fn add(&self, left: Value, mut right: Value) -> Value {
         if left.unit != right.unit {
-            let converted = self.convert(right, &left.unit.clone().unwrap_or_default());
-            right.number = converted.number;
-            right.unit = converted.unit;
+            right = self.convert(right, &left.unit.clone().unwrap_or_default());
         }
 
-        self.percent(&left, right);
-        &left + right
+        self.percent(&left, &mut right);
+        left + right
     }
 
     /// Subtraction
-    pub fn sub(&self, left: Value, right: &mut Value) -> Value {
+    pub fn sub(&self, left: Value, mut right: Value) -> Value {
         if left.unit != right.unit {
-            let converted = self.convert(right, &left.unit.clone().unwrap_or_default());
-            right.number = converted.number;
-            right.unit = converted.unit;
+            right = self.convert(right, &left.unit.clone().unwrap_or_default());
         }
 
-        self.percent(&left, right);
-        &left - right
+        self.percent(&left, &mut right);
+        left - right
     }
 
     /// Multiplication
-    pub fn mul(&self, left: Value, right: &mut Value) -> Value {
+    pub fn mul(&self, left: Value, mut right: Value) -> Value {
         if left.unit != right.unit {
-            let converted = self.convert(right, &left.unit.clone().unwrap_or_default());
-            right.number = converted.number;
-            right.unit = converted.unit;
+            right = self.convert(right, &left.unit.clone().unwrap_or_default());
         }
 
-        self.percent(&left, right);
-        &left * right
+        self.percent(&left, &mut right);
+        left * right
     }
 
     /// Division
-    pub fn div(&self, left: Value, right: &mut Value) -> Value {
+    pub fn div(&self, left: Value, mut right: Value) -> Value {
         if left.unit != right.unit {
-            let converted = self.convert(right, &left.unit.clone().unwrap_or_default());
-            right.number = converted.number;
-            right.unit = converted.unit;
+            right = self.convert(right, &left.unit.clone().unwrap_or_default());
         }
 
-        self.percent(&left, right);
-        &left / right
+        self.percent(&left, &mut right);
+        left / right
     }
 
     /// Modulo
-    pub fn rem(&self, left: Value, right: &mut Value) -> Value {
+    pub fn rem(&self, left: Value, mut right: Value) -> Value {
         if left.unit != right.unit {
-            let converted = self.convert(right, &left.unit.clone().unwrap_or_default());
-            right.number = converted.number;
-            right.unit = converted.unit;
+            right = self.convert(right, &left.unit.clone().unwrap_or_default());
         }
 
-        self.percent(&left, right);
-        &left % right
+        self.percent(&left, &mut right);
+        left % right
     }
 
     fn percent(&self, left: &Value, right: &mut Value) {
@@ -88,7 +78,7 @@ impl<'a> Converter<'a> {
         }
     }
 
-    pub fn convert(&self, from: &Value, to_unit: &Unit) -> Value {
+    pub fn convert(&self, from: Value, to_unit: &Unit) -> Value {
         let mut value = Value {
             number: from.number,
             unit: from.unit.clone(),
@@ -103,7 +93,6 @@ impl<'a> Converter<'a> {
 
         // Special case for percentages.
         if from_unit.0 == String::from("%") {
-            println!("Forming a percentage here! {}", from.number / 100.);
             return Value {
                 number: from.number / 100.,
                 unit: Some(Unit::new("%")),
@@ -222,32 +211,12 @@ impl Add for Value {
     }
 }
 
-impl Add for &Value {
-    type Output = Value;
-    fn add(self, rhs: Self) -> Self::Output {
-        Value {
-            number: self.number + rhs.number,
-            unit: self.unit.clone(),
-        }
-    }
-}
-
 impl Sub for Value {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {
         Self {
             number: self.number - rhs.number,
             unit: self.unit,
-        }
-    }
-}
-
-impl Sub for &Value {
-    type Output = Value;
-    fn sub(self, rhs: Self) -> Self::Output {
-        Value {
-            number: self.number - rhs.number,
-            unit: self.unit.clone(),
         }
     }
 }
@@ -262,16 +231,6 @@ impl Mul for Value {
     }
 }
 
-impl Mul for &Value {
-    type Output = Value;
-    fn mul(self, rhs: Self) -> Self::Output {
-        Value {
-            number: self.number * rhs.number,
-            unit: self.unit.clone(),
-        }
-    }
-}
-
 impl Div for Value {
     type Output = Self;
     fn div(self, rhs: Self) -> Self::Output {
@@ -282,32 +241,12 @@ impl Div for Value {
     }
 }
 
-impl Div for &Value {
-    type Output = Value;
-    fn div(self, rhs: Self) -> Self::Output {
-        Value {
-            number: self.number / rhs.number,
-            unit: self.unit.clone(),
-        }
-    }
-}
-
 impl Rem for Value {
     type Output = Self;
     fn rem(self, rhs: Self) -> Self::Output {
         Self {
             number: self.number % rhs.number,
             unit: self.unit,
-        }
-    }
-}
-
-impl Rem for &Value {
-    type Output = Value;
-    fn rem(self, rhs: Self) -> Self::Output {
-        Value {
-            number: self.number % rhs.number,
-            unit: self.unit.clone(),
         }
     }
 }
